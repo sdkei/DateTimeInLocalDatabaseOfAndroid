@@ -42,4 +42,86 @@ class DateTimeDaoTest {
         assertThat(dao.datetimeAd9999(), `is`("9999-12-31 23:59:59"))
         assertThat(dao.datetimeAd9999Plus1(), `is`(null as String?))
     }
+
+    @Test
+    fun test_countDateTimeEntitiesBefore() {
+        runBlocking(Dispatchers.IO) {
+            dao.insertDateTimeEntity("2000-01-01T00:00:01.1Z".toDateTimeEntity())
+            dao.insertDateTimeEntity("2000-01-01T00:00:01.9Z".toDateTimeEntity())
+            dao.insertDateTimeEntity("2000-01-01T00:00:03.1Z".toDateTimeEntity())
+            dao.insertDateTimeEntity("2000-01-01T00:00:03.9Z".toDateTimeEntity())
+            assertThat(
+                dao.countDateTimeEntitiesBefore("2000-01-01T00:00:00.0Z".toInstant()),
+                `is`(0)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesBefore("2000-01-01T00:00:01.1Z".toInstant()),
+                `is`(0)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesBefore("2000-01-01T00:00:01.9Z".toInstant()),
+                `is`(0)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesBefore("2000-01-01T00:00:02.0Z".toInstant()),
+                `is`(2)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesBefore("2000-01-01T00:00:03.1Z".toInstant()),
+                `is`(2)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesBefore("2000-01-01T00:00:03.9Z".toInstant()),
+                `is`(2)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesBefore("2000-01-01T00:00:04.0Z".toInstant()),
+                `is`(4)
+            )
+        }
+    }
+
+    @Test
+    fun test_countDateTimeEntitiesAfter() {
+        runBlocking(Dispatchers.IO) {
+            dao.insertDateTimeEntity("2000-01-01T00:00:01.1Z".toDateTimeEntity())
+            dao.insertDateTimeEntity("2000-01-01T00:00:01.9Z".toDateTimeEntity())
+            dao.insertDateTimeEntity("2000-01-01T00:00:03.1Z".toDateTimeEntity())
+            dao.insertDateTimeEntity("2000-01-01T00:00:03.9Z".toDateTimeEntity())
+            assertThat(
+                dao.countDateTimeEntitiesAfter("2000-01-01T00:00:00.0Z".toInstant()),
+                `is`(4)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesAfter("2000-01-01T00:00:01.1Z".toInstant()),
+                `is`(2)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesAfter("2000-01-01T00:00:01.9Z".toInstant()),
+                `is`(2)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesAfter("2000-01-01T00:00:02.0Z".toInstant()),
+                `is`(2)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesAfter("2000-01-01T00:00:03.1Z".toInstant()),
+                `is`(0)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesAfter("2000-01-01T00:00:03.9Z".toInstant()),
+                `is`(0)
+            )
+            assertThat(
+                dao.countDateTimeEntitiesAfter("2000-01-01T00:00:04.0Z".toInstant()),
+                `is`(0)
+            )
+        }
+    }
+
+    private fun String.toInstant(): Instant =
+        Instant.parse(this)
+
+    private fun String.toDateTimeEntity(): DateTimeEntity =
+        DateTimeEntity(dateTime = this.toInstant())
 }

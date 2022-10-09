@@ -3,11 +3,24 @@ package io.github.sdkei.datetimeinlocaldatabase
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import java.time.Instant
 
 @Dao
 interface DateTimeDao {
     @Insert
     suspend fun insertDateTimeEntity(dateTimeEntity: DateTimeEntity)
+
+    /**
+     * 指定された日時より前の [DateTimeEntity] の数を返す。
+     */
+    @Query("SELECT count(*) FROM DateTimeEntity WHERE DateTimeEntity.dateTime < :dateTime")
+    suspend fun countDateTimeEntitiesBefore(dateTime: Instant): Int
+
+    /**
+     * 指定された日時より後の [DateTimeEntity] の数を返す。
+     */
+    @Query("SELECT count(*) FROM DateTimeEntity WHERE DateTimeEntity.dateTime > :dateTime")
+    suspend fun countDateTimeEntitiesAfter(dateTime: Instant): Int
 
     @Query("SELECT datetime('now')")
     fun datetimeNow(): String
